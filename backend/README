@@ -1,0 +1,2 @@
+the go-mysql.sh script is what you should actually run to launch the script in the subfolder. This is the one that loops the other one.
+The other one loads the virtualenv and runs the python

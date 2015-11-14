@@ -1,0 +1,26 @@
+lsf-graphs
+
+Preface:
+This code is based on code from passrafi's lsf-stats ( https://github.com/passrafi/lsf-stats ), though, I only blatantly copy a few of his functions and fix a few others. Given this, I'm releasing this code under the MIT license, as most of the implementation is obvious, given an example, and a large portion of the code is different from his code and more specific to this purpose.
+If there are any issues, please create an issue on this repo
+
+License:
+MIT LICENSE
+Please see LICENSE file.
+This license applies to all files in this project unless otherwise noted.
+
+Install:
+The db folder contains the database structure and an example script to push a name dictionary from a list of users and projects into it
+
+The backend folder contains the code which utilizes the LSF Python API ( https://github.com/PlatformLSF/platform-python-lsf-api ) to push job data into the database
+This code will need some tweaking for your system.
+It is designed to run on Python ~2.7 on CentOS 6 plus or minus a bit.
+Ultimately, you'll just run go-mysql.sh in a screen, or, run the script that go-mysql.sh runs, perhaps through cron.. often.. like every minute.
+
+The web folder contains the frontend code to make the graphs and pull data from the backend.
+The php script that pulls from the db may not be very safe. SQL injections have not been looked into.
+It does not scale.. there is no cache to not pull from DB. Hard requests could be stacked and kill the web or DB server.
+The front end should store state somewhere instead of pulling the same JSON data for each type of graph.. it's not efficient.
+The 10 minute auto refresh is in there incase you want to do maintenance or if there is a memory leak.. that way the page can run for a long time and still be OK.
+
+

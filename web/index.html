@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf=8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta http-equiv="refresh" content="600;">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>CLUSTER Live</title>
+	<script type='text/javascript' src='jquery.min.js'></script>
+	<script src="highcharts.js"></script>
+
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+
+	<style>
+		html, body {
+			height: 100%;
+		}
+		.full-height {
+			height: 100%;
+			overflow-y: hidden;
+		}
+		.graph-container {
+			min-width: 200px;
+			min-height: 230px;
+			height: 25%;
+		}
+		.table-container {
+			min-width: 200px;
+			min-height: 230px;
+			height: 25%;
+		}
+		/* For maintenance swap the below comments */
+		/* 
+		.col-md-6 {
+			visibility: hidden;
+		}
+		*/
+		.maintenance {
+			visibility: hidden;
+		}
+		/* For maintenance swap the above comments */
+	</style>
+
+
+
+<script type='text/javascript'>
+
+var coreschartoptions = {
+        credits:{enabled:false},
+	colors: [ '#FF0000' ],
+        chart: {
+            renderTo: 'graphcontainer1',
+            type: 'line'
+        },
+        legend: {
+            enabled: false,
+        },
+        title: {
+            text: 'Cores in use on Minerva'
+        },
+        subtitle: {
+            text: 'number of cores in use'
+        },
+	plotOptions: {
+            line: {
+                marker: {
+                    enabled: false
+                },
+                states: {
+                    hover: {
+                        enabled: false
+                    }
+                }
+            }
+        },
+        xAxis: {
+            type: 'datetime'
+        },
+        yAxis: [{
+            title: {
+                text: 'cores'
+            },
+            // min: 0
+        }, {
+            title: {
+                text: 'cores'
+            },
+            opposite: true,
+            // min: 0
+	}],
+        tooltip: {
+            formatter: function () {
+                return Highcharts.dateFormat('%e. %b %I:%M %p', this.x) + ': ' + this.y;
+            }
+        },
+        series:[]
+};
+var memchartoptions = {
+        credits:{enabled:false},
+        chart: {
+            renderTo: 'graphcontainer2',
+            type: 'line'
+        },
+        legend: {
+            enabled: false
+        },
+        title: {
+            text: 'Memory in use on Minerva'
+        },
+        subtitle: {
+            text: 'total memory allocated to jobs and in use by jobs'
+        },
+	plotOptions: {
+            line: {
+                marker: {
+                    enabled: false
+                },
+                states: {
+                    hover: {
+                        enabled: false
+                    }
+                }
+            },
+	   series: {
+		dataLabels: {
+			enabled: false,
+			crop: false,
+			overflow: 'none',
+			style: {
+				color: 'black'
+			},
+			formatter: function() {
+				return Math.floor(this.y/100000000000)/10;
+			}
+		}
+           }
+        },
+        xAxis: {
+            type: 'datetime'
+        },
+        yAxis: [{
+            title: {
+                text: 'TB'
+            },
+            // min: 0
+          }, {
+            title: {
+                text: 'TB'
+            },
+//	    max: 1000,
+            // min: 0,
+            opposite: true
+	  }],
+        tooltip: {
+            formatter: function () {
+                return Highcharts.dateFormat('%e. %b %I:%M %p', this.x) + ': ' + this.y;
+            }
+        },
+        series:[]
+};
+
+var jobschartoptions = {
+        credits:{enabled:false},
+	colors: [ '#FFFF00', '#00FF00' ],
+        chart: {
+            renderTo: 'graphcontainer3',
+            type: 'area'
+        },
+        legend: {
+	    // labelFormat: '{name}: {point.y:.2f} <br/>',
+	    labelFormat: '{name}',
+            borderWidth: 1,
+            layout: 'vertical',
+            align: 'left',
+            verticalAlign: 'top',
+            floating: true,
+            x: 100,
+            y: 50
+        },
+        title: {
+            text: 'Number of Jobs on Minerva'
+        },
+        subtitle: {
+            text: 'running vs pending'
+        },
+	plotOptions: {
+	   area: {
+		marker: { enabled: false },
+		stacking: 'normal',
+		lineColor: '#666666',
+		lineWidth: 1,
+	   },
+	   series: {
+		dataLabels: {
+			enabled: false,
+			crop: false,
+			overflow: 'none',
+			style: {
+				color: 'black'
+			},
+			formatter: function() {
+				return this.y;
+			}
+		}
+           }
+        },
+        xAxis: {
+            type: 'datetime'
+        },
+        yAxis: [{
+            title: {
+                text: 'quantity'
+            },
+            min: 0
+        }, {
+            title: {
+                text: 'quantity'
+            },
+            min: 0,
+	    // max: 10,
+            opposite: true
+	}],
+        tooltip: {
+            formatter: function () {
+                return Highcharts.dateFormat('%e. %b %I:%M %p', this.x) + ': ' + this.y;
+            }
+        },
+        series:[]
+};
+
+var timechartoptions = {
+        credits:{enabled:false},
+        chart: {
+            renderTo: 'graphcontainer4',
+            type: 'line'
+        },
+        legend: {
+            enabled: false
+        },
+        title: {
+            text: 'Waiting Time on Minerva'
+        },
+        subtitle: {
+            text: 'average time running jobs waited to run'
+        },
+	plotOptions: {
+            line: {
+                marker: {
+                    enabled: false
+                },
+                states: {
+                    hover: {
+                        enabled: false
+                    }
+                }
+            },
+	   series: {
+		dataLabels: {
+			enabled: false,
+			crop: false,
+			overflow: 'none',
+			style: {
+				color: 'black'
+			},
+			formatter: function() {
+				return Math.floor(this.y*10)/10;
+			}
+		}
+           }
+        },
+        xAxis: {
+            type: 'datetime'
+        },
+        yAxis: [{
+            title: {
+                text: 'hours'
+            },
+            // min: 0
+        }, {
+            title: {
+                text: 'hours'
+            },
+            // min: 0,
+	    // max: 10,
+            opposite: true
+	}],
+        tooltip: {
+            formatter: function () {
+                return Highcharts.dateFormat('%e. %b %I:%M %p', this.x) + ': ' + this.y;
+            }
+        },
+        series:[]
+};
+
+var usersplitchartoptions = {
+        credits:{enabled:false},
+	// colors: [ '#4086AA', '#91C3DC' ],
+	colors: [ '#CC0000', '#996600', '#FFCC00', '#3333FF' ],
+        chart: {
+            renderTo: 'graphcontainer5',
+            type: 'bar'
+        },
+	legend: {
+	    enabled: false
+	},
+        title: {
+            text: 'User Spread'
+        },
+        subtitle: {
+            text: 'relative core usage by user'
+        },
+        xAxis: {
+            categories: [''],
+            gridLineColor: 'transparent',
+            lineColor: 'transparent',
+        },
+        yAxis: {
+            lineWidth: 0,
+            minorGridLineWidth: 0,
+            gridLineColor: 'transparent',
+            lineColor: 'transparent',
+	    labels: {
+		enabled: false
+            },
+            minorTickLength: 0,
+            tickLength: 0,
+            title: {
+                text: ''
+            },
+            min: 0,
+            stackLabels: {
+		enabled: false,
+	    }
+        }, 
+        tooltip: {
+            formatter: function () {
+                return '<b>' + this.series.name + '<br />' + this.y + ' cores</b>';
+            }
+        },
+	plotOptions: {
+		series: {
+			animation: false,
+			stacking: 'percent',
+			dataLabels: {
+				enabled: true,
+				color: (Highcharts.theme && Highcharts.theme.dataLabelsColor || 'white' ),
+            			formatter: function () {
+					if ( this.percentage > 10 ) {
+                				return '<center>' + this.series.name + '<br />' + this.y + ' cores</center>';
+					} else { 
+						return '';
+					}
+            			}
+			}
+		}
+	},
+        series:[]
+};
+
+var jsonphpfile = '/lsf/jobstable2json.php';
+var dateobject = new Date();
+var timezoneoffset = dateobject.getTimezoneOffset() * -60000;
+// var timezoneoffset = -14400000
+var seriesarr1 = {name: "Cores", data: []};
+// var seriesarr2 = {name: "threads", yAxis: 1, data: []};
+var seriesarr3 = {name: "mem", data: []};
+// var seriesarr4 = {name: "mem_avg", yAxis: 1, data: []};
+var seriesarr4 = {name: "mem_reservation", data: []};
+var seriesarr5 = {name: "Pending jobs", data: []};
+var seriesarr6 = {name: "Running jobs", data: []};
+var seriesarr7 = {name: "total_jobs", data: []};
+var seriesarr8 = {name: "pending_time_avg", data: []};
+coreschartoptions.series.push(seriesarr1);
+// coreschartoptions.series.push(seriesarr2);
+memchartoptions.series.push(seriesarr3);
+memchartoptions.series.push(seriesarr4);
+jobschartoptions.series.push(seriesarr5);
+jobschartoptions.series.push(seriesarr6);
+// jobschartoptions.series.push(seriesarr7);
+timechartoptions.series.push(seriesarr8);
+var charts = {};
+var refresh = 30000;
+var end = ""; 
+var start = ""; 
+var user = "";
+var topcorestablearray = {};
+var topprojectstablearray = {};
+
+$.urlParam = function(name){
+    var results = new RegExp('[\\?&]' + name + '=([^&#]*)').exec(window.location.href);
+    if (results == null) { 
+	return "";
+    } else { 
+    	return results[1] || 0;
+    }
+}
+
+$(document).ready(function() {
+charts[1] = new Highcharts.Chart(coreschartoptions);
+charts[2] = new Highcharts.Chart(memchartoptions);
+charts[3] = new Highcharts.Chart(jobschartoptions);
+charts[4] = new Highcharts.Chart(timechartoptions);
+charts[5] = new Highcharts.Chart(usersplitchartoptions);
+end = $.urlParam("end");
+start = $.urlParam("start");
+user = $.urlParam("user");
+redoanychart("cores",1,0);
+// redoanychart("threads",1,1);
+redoanychart("mem",2,0,0.000001);
+redoanychart("mem_reservation",2,1,0.000001);
+redoanychart("pending_jobs",3,0);
+redoanychart("running_jobs",3,1);
+//redoanychart("total_jobs",3,0);
+redoanychart("pending_time_avg",4,0,60*60);
+redomultiserieschart("cores",5);
+redoprojectstable("projects");
+// end of document ready
+});
+
+function redoanychart(table,chartnum,seriesnum,d) {
+	var x=[];
+	$.getJSON(jsonphpfile + "?type=summary&start=" + start + "&end=" + end + "&user=" + user,function(jdata) {
+		$.each(jdata, function(key, data2) {
+			if(d) {
+				x.push([parseInt(data2["timestamp"]*1000+timezoneoffset),parseFloat(data2[table]/d)]);
+			} else {
+				x.push([parseInt(data2["timestamp"]*1000+timezoneoffset),parseInt(data2[table])]);
+			}
+  		});
+		x.push({
+			dataLabels: {
+				enabled: true,
+			},
+			x: x[x.length-1][0],
+			y: x[x.length-1][1]
+		});
+		charts[chartnum].series[seriesnum].setData(x,true);
+	// end of getJSON
+	}).always( function() { setTimeout(redoanychart,30000,table,chartnum,seriesnum,d); });
+	// end of redocorecharts
+};
+
+function redomultiserieschart(table,chartnum) {
+	$.each(charts[chartnum].series, function(key,value) {
+		value.setData([0],false);
+	});
+	$.getJSON(jsonphpfile + "?type=xpery&field=user&dictionary=true&sort=" + table + "&user=" + user,function(jdata) {
+		var i=0;
+		$.each(jdata, function(key, data2) {
+			var itisset = false;
+			$.each(charts[chartnum].series, function(key, value) {
+				if( key == data2['token'] ) {
+					value.setData([ parseInt(data2[table]) ], false);
+					itisset = true;
+				} 
+			});
+			if( itisset == false ) {
+					charts[chartnum].addSeries({
+						name: data2['longname'].substring(0, 13) + '...',
+					//	color: charts[chartnum].series.length % 2 == 1 ? '#7cb5ec' : '#434348', 
+						data: [ parseInt(data2[table]) ]
+					}, false);
+			} 
+			i++;
+			return i<(Object.keys(jdata).length - (Object.keys(jdata).length % 4)); 
+  		});
+		charts[chartnum].redraw();
+		var tablecontent = '';
+		for (var i = 0; i< 5; i++) {
+			var updown = '<i style="color:orange">&#8212;</i>';
+			if ( topcorestablearray[jdata[i].token] ) {
+				if ( ( jdata[i].cores - topcorestablearray[jdata[i].token] )  > 0 ) {
+					updown = '<i class="fa fa-arrow-up" style="color:green"></i>&nbsp;' + (jdata[i].cores - topcorestablearray[jdata[i].token]);
+				} else { 
+					if ( ( jdata[i].cores - topcorestablearray[jdata[i].token] )  < 0 ) {
+						updown = '<i class="fa fa-arrow-down" style="color:red"></i>&nbsp;' + (jdata[i].cores - topcorestablearray[jdata[i].token]);
+					} else {
+						updown = '<i style="color:orange">&#8212;</i>';
+					}
+				}
+			}
+			topcorestablearray[jdata[i].token] = jdata[i].cores;
+
+			tablecontent += '<tr><th scope="row">' + (i+1) + '</th><td>' + jdata[i].longname + '</td><td>' + jdata[i].cores +  '</td><td>' + updown + '</tr>';
+		}
+		$('#top' + table + 'table tbody').html(tablecontent);
+	// end of getJSON
+	}).always( function() { setTimeout(redomultiserieschart,30000,table,chartnum); });
+	// end of redocorecharts
+};
+
+function redoprojectstable(table) {
+	$.getJSON(jsonphpfile + "?type=xpery&field=project_name&sort=cores&dictionary=true&user=" + user,function(jdata) {
+		var tablecontent = '';
+		for (var i = 0; i< 5; i++) {
+			var updown = '<i style="color:orange">&#8212;</i>';
+			if ( topprojectstablearray[jdata[i].token] ) {
+				if ( ( jdata[i].cores - topprojectstablearray[jdata[i].token] )  > 0 ) {
+					updown = '<i class="fa fa-arrow-up" style="color:green"></i>&nbsp;' + (jdata[i].cores - topprojectstablearray[jdata[i].token]);
+				} else { 
+					if ( ( jdata[i].cores - topprojectstablearray[jdata[i].token] )  < 0 ) {
+						updown = '<i class="fa fa-arrow-down" style="color:red"></i>&nbsp;' + (jdata[i].cores - topprojectstablearray[jdata[i].token]);
+					} else {
+						updown = '<i style="color:orange">&#8212;</i>';
+					}
+				}
+			}
+			topprojectstablearray[jdata[i].token] = jdata[i].cores;
+
+			tablecontent += '<tr><th scope="row">' + (i+1) + '</th><td>' + jdata[i].longname + '</td><td>' + jdata[i].cores + '</td><td>' + updown + '</tr>';
+		}
+		$('#top' + table + 'table tbody').html(tablecontent);
+	// end of getJSON
+	}).always( function() { setTimeout(redoprojectstable,30000,table); });
+	// end of redocorecharts
+};
+
+</script>
+</head>
+<body>
+<div class="col-md-12">
+	<div class="text-center">
+	<!-- customize here -->
+	<img src="header.png">
+	</div>
+</div>
+
+<!-- uncomment the below for maintenance -->
+<!-- 
+<div class="col-md-12 maintenance">
+<h2>
+<center>
+<br><BR><BR><BR>
+Graphs are currently undergoing maintenance..
+.. Will be back soon.
+</center>
+</h2>
+</div>
+-->
+<!-- uncomment the above for maintenance -->
+
+<div class="col-md-6">
+<div id="graphcontainer1" class="graph-container"></div>
+<div id="graphcontainer2" class="graph-container"></div>
+<div id="graphcontainer3" class="graph-container"></div>
+<div id="graphcontainer4" class="graph-container"></div>
+</div>
+
+<div class="col-md-6">
+<div id="graphcontainer5" class="graph-container"></div>
+<div id="topcorestablecontainer" class="table-containers">
+	<table id='topcorestable' class="table table-condensed">
+		<caption class="text-center"><h4>Top Minerva Users Running</h4></caption>
+		<thead><tr><th class="col-md-1">Rank</th><th>User</th><th class="col-md-1">Cores</th><th class="col-md-1"></th></tr></thead>
+		<tbody>
+		</tbody>
+	</table>
+</div>
+<div id="topprojectstablecontainer" class="table-containers">
+	<table id='topprojectstable' class="table table-condensed">
+		<caption class="text-center"><h4>Top Minerva Projects Running</h4></caption>
+		<thead><tr><th class="col-md-1">Rank</th><th>Project</th><th class="col-md-1">Cores</th><th class="col-md-1"></th></tr></thead>
+		<tbody>
+		</tbody>
+	</table>
+</div>
+<div id="logos">
+</div>
+</div>
+
+</body>
+</html>

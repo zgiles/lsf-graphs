@@ -1,0 +1,2 @@
+create.sql has the db structure
+import.php is a php script you would run on the CLI to import names into the DB for pretty name on the frontend

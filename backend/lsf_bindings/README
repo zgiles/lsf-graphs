@@ -1,0 +1,2 @@
+You should put the LSF api into this folder, Perhaps use the Makefile to instantiate a virtualenv and load it in there.
+I don't recommend running the Makefile directly, which is why I called it _Makefile. You should copy it to Makefile and decide if it works for you
