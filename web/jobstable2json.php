@@ -1,5 +1,6 @@
 <?php
 
+include("cache_header.php");
 include("cred.php");
 
 mysql_connect($dbhost, $dbusername, $dbpassword) or die(mysql_error()); 
@@ -50,5 +51,7 @@ while($r = mysql_fetch_assoc($sth)) {
 //    print $r['timestamp'] . "," . $r['br'] . PHP_EOL;
 }
 print json_encode($rows);
+
+include("cache_footer.php");
 
 ?>
