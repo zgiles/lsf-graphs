@@ -1,20 +1,17 @@
 <?php
 
-$end = ( isset($_GET['end']) && $_GET['end'] != '' && is_int(intval($_GET['end'])) ? intval($_GET['end']) : intval(time() - 60) );
-$start = ( isset($_GET['start']) && $_GET['end'] != '' && is_int(intval($_GET['start'])) ? intval($_GET['start']) : intval($end - (180*60)) );
-$field = ( isset($_GET['field']) && $_GET['field'] != '' ? $_GET['field'] : false );
-$user = ( isset($_GET['user']) && $_GET['user'] != '' ? $_GET['user'] : false );
-$type = ( isset($_GET['type']) && $_GET['type'] != '' ? $_GET['type'] : "summary" ); 
-$sort = ( isset($_GET['sort']) && $_GET['sort'] != '' ? $_GET['sort'] : false );
-$dictionary = ( isset($_GET['dictionary']) && $_GET['dictionary'] != '' ? true : false );
-
-$dbhost = 'db1.example.local';
-$dbusername = 'lsfstats';
-$dbpassword = 'lsfstats';
-$dbname = 'lsfstats';
+include("cred.php");
 
 mysql_connect($dbhost, $dbusername, $dbpassword) or die(mysql_error()); 
 mysql_select_db($dbname) or die(mysql_error());
+
+$end = ( isset($_GET['end']) && $_GET['end'] != '' && is_int(intval($_GET['end'])) ? mysql_real_escape_string(intval($_GET['end'])) : intval(time() - 60) );
+$start = ( isset($_GET['start']) && $_GET['end'] != '' && is_int(intval($_GET['start'])) ? mysql_real_escape_string(intval($_GET['start'])) : intval($end - (180*60)) );
+$field = ( isset($_GET['field']) && $_GET['field'] != '' ? mysql_real_escape_string($_GET['field']) : false );
+$user = ( isset($_GET['user']) && $_GET['user'] != '' ? mysql_real_escape_string($_GET['user']) : false );
+$type = ( isset($_GET['type']) && $_GET['type'] != '' ? mysql_real_escape_string($_GET['type']) : "summary" );
+$sort = ( isset($_GET['sort']) && $_GET['sort'] != '' ? mysql_real_escape_string($_GET['sort']) : false );
+$dictionary = ( isset($_GET['dictionary']) && $_GET['dictionary'] != '' ? true : false );
 
 if($type == "instant") {
 	$field = ( $field ? $field : "cores" );
