@@ -1,7 +1,7 @@
 lsf-graphs
 
 Preface:
-This code is based on code from passrafi's lsf-stats ( https://github.com/passrafi/lsf-stats ), though, I only blatantly copy a few of his functions and fix a few others. Given this, I'm releasing this code under the MIT license, as most of the implementation is obvious, given an example, and a large portion of the code is different from his code and more specific to this purpose.
+This code is based on code from passrafi's lsf-stats ( https://github.com/passrafi/lsf-stats ), though, I only blatantly copied a few of his functions and fixed a few others. Given this, I'm releasing this code under the MIT license, as most of the implementation is obvious, given an example, and a large portion of the code is different from his code and more specific to this purpose.
 If there are any issues, please create an issue on this repo
 
 License:
